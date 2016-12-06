@@ -1,0 +1,37 @@
+<div class="incomes">
+  <h2 class="category-name">Incomes</h2>
+  <table>
+    <tr>
+      <th>Type</th>
+      <th>Amount</th>
+    </tr>
+    <% session[:incomes].each do |type, amount| %>
+      <tr>
+        <td><%= type %></td>
+        <td><%= amount %></td>
+        <td>
+          <form action="/incomes/delete" method="post">
+            <button type="submit">Delete</button>
+          </form>
+        </td>
+      </tr>
+    <% end %>
+    <tr>
+      <form action="/incomes" method="post">
+        <td>
+          <input name="type" placeholder="Salary, Freelance, etc." type="text">
+        </td>
+        <td>
+          <input name="amount" placeholder="10, 20, etc." type="text">
+        </td>
+        <td>
+          <input type="submit" value="Add">
+        </td>
+      </form>
+    </tr>
+  </table>
+</div>
+
+<% content_for :header_links do %>
+  <a class="main" href="/">Back to Main Menu</a>
+<% end %>
