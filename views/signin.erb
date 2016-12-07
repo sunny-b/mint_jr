@@ -1,0 +1,24 @@
+<div class='signin'>
+  <form action='/users/signin' method='post'>
+    <div class="text-field">
+      <label for="username">Username:</label>
+      <input name="username" type="text" value="<%= params[:username] %>">
+    </div>
+    <div class="text-field">
+      <label for="password">Password:</label>
+      <input name="password" type="text">
+    </div>
+    <input type="submit" value="Sign In">
+  </form>
+  <br>
+  <div>
+    <h5 class="register">Not Registered?</h5>
+    <form action='/users/signup' method="get">
+      <button type="submit">Sign Up</button>
+    </form>
+  </div>
+</div>
+
+<% content_for :header_links do %>
+  <h1 class="logo">Mint JR.</h5>
+<% end %>

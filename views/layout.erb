@@ -1,17 +1,24 @@
 <!doctype html>
 <html>
-<head>
-  <title>Mint Jr.</title>
-  <link rel="stylesheet" href="stylesheets/style.css">
-</head>
-<header>
-  <% if session[:message] %>
-    <h4 class="message"><%= session.delete(:message) %></h4>
-  <% end %>
-  <%= yield_content :header_links %>
-  <h5 class="logo">Mint JR.</h5>
-</header>
-<body>
-  <%= yield %>
-</body>
+  <head>
+    <title>Mint Jr.</title>
+    <link rel="stylesheet" href="/stylesheets/style.css">
+  </head>
+  <header>
+    <% if session[:message] %>
+      <h4 class="message"><%= session.delete(:message) %></h4>
+    <% end %>
+    <%= yield_content :header_links %>
+  </header>
+  <body>
+    <%= yield %>
+  </body>
+  <footer>
+    <% if session[:username] %>
+      <form class="signout" action="users/signout" method="post">
+        <label for="signout">Signed in as <%= session[:username] %>.</label>
+        <input type="submit" value="Sign Out">
+      </form>
+    <% end %>
+  </footer>
 </html>

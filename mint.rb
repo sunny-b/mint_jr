@@ -13,6 +13,7 @@ configure do
 end
 
 before do
+  session[:username] ||= nil
   session[:incomes] ||= []
   session[:expenses] ||= []
   session[:assets] ||= []
@@ -38,6 +39,15 @@ helpers do
       result << [','] unless reversed_amount.empty?
     end
     result.flatten.reverse.join
+  end
+
+  def load_user_credentials
+    credentials = if ENV["RACK_ENV"] == 'test'
+      File.expand_path("../test/users.yml", __FILE__)
+    else
+      File.expand_path("../users.yml", __FILE__)
+    end
+    YAML.load_file(credentials)
   end
 
   def load_list_info(list)
@@ -125,15 +135,25 @@ end
 
 # visit main page
 get '/' do
-  @incomes = calculate(session[:incomes])
-  @expenses = calculate(session[:expenses])
-  @assets = calculate(session[:assets])
-  @liabilities = calculate(session[:liabilities])
-  @tax_bracket = determine_tax_bracket(params[:status], @incomes, @expenses)
-  if params[:status]
-    session[params[:status].to_sym] = 'selected'
+  if session[:username]
+    @incomes = calculate(session[:incomes])
+    @expenses = calculate(session[:expenses])
+    @assets = calculate(session[:assets])
+    @liabilities = calculate(session[:liabilities])
+    @tax_bracket = determine_tax_bracket(params[:status], @incomes, @expenses)
+    if params[:status]
+      session[params[:status].to_sym] = 'selected'
+    end
+    erb :index
+  else
+    session[:message] = "Please login first."
+    redirect '/users/signin'
   end
-  erb :index
+end
+
+# signin page
+get '/users/signin' do
+  erb :signin
 end
 
 # visit incomes page
@@ -161,4 +181,32 @@ end
 post '/:page_name/:id/delete' do
   session[params[:page_name].to_sym].reject! { |item| item[:id] == params[:id].to_i }
   redirect "/#{params[:page_name]}"
+end
+
+def correct_login?(user, password)
+  users = load_user_credentials
+  if users.key? user
+    BCrypt::Password.new(users[user][:password]) == password
+  else
+    false
+  end
+end
+
+post "/users/signin" do
+  username = params[:username]
+  password = params[:password]
+  if correct_login?(username, password)
+    session[:username] = username
+    session[:message] = 'Welcome!'
+    redirect '/'
+  else
+    session[:message] = 'Invalid Credentials'
+    erb :signin
+  end
+end
+
+post "/users/signout" do
+  session[:username] = nil
+  session[:message] = "You have been logged out."
+  redirect "/users/signin"
 end

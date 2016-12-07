@@ -34,3 +34,7 @@
   <h3 class="block"> Federal Tax Bracket:</h3>
   <p><%= (params[:status] && params[:status]!= 'pick') ? @tax_bracket : "Please pick a status." %></p>
 </div>
+
+<% content_for :header_links do %>
+  <h5 class="logo">Mint JR.</h5>
+<% end %>
