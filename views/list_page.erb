@@ -1,28 +1,28 @@
 <div class="incomes">
-  <h2 class="category-name">Incomes</h2>
+  <h2 class="category-name"><%= @page_name %></h2>
   <table>
     <tr>
       <th>Type</th>
       <th>Amount</th>
     </tr>
-    <% session[:incomes].each do |type, amount| %>
+    <% @list.each do |item| %>
       <tr>
-        <td><%= type %></td>
-        <td><%= amount %></td>
+        <td><%= item[:type] %></td>
+        <td><%= item[:amount] %></td>
         <td>
-          <form action="/incomes/delete" method="post">
+          <form action="/<%= @page_name.downcase %>/<%= item[:id] %>/delete" method="post">
             <button type="submit">Delete</button>
           </form>
         </td>
       </tr>
     <% end %>
     <tr>
-      <form action="/incomes" method="post">
+      <form action="/<%= @page_name.downcase %>/add" method="post">
         <td>
-          <input name="type" placeholder="Salary, Freelance, etc." type="text">
+          <input name="type" placeholder="<%= @item_description %>" type="text">
         </td>
         <td>
-          <input name="amount" placeholder="10, 20, etc." type="text">
+          <input name="amount" placeholder="100, 200, etc." type="text">
         </td>
         <td>
           <input type="submit" value="Add">

@@ -1,19 +1,21 @@
 <div class="block-section">
   <h2>Monthly Finances</h2>
   <ul>
-    <li><a href="/incomes">Income:</a> <p>$<%= @incomes %></p></li>
+    <li><a href="/incomes">Incomes:</a> <p>$<%= @incomes %></p></li>
     <li><a href="/expenses">Expenses:</a> <p>$<%= @expenses %></p></li>
     <li><h3>Cashflow:</h3> <p>$<%= @incomes - @expenses %></p></li>
   <ul>
 </div>
+
 <div class="block-section">
-  <h2>Net Worth</h2>
+  <h2>Nest Egg</h2>
   <ul>
     <li><a href="/assets">Total Assets:</a> <p>$<%= @assets %></p></li>
     <li><a href="/liabilities">Total Liabilities:</a> <p>$<%= @liabilities %></p></li>
     <li><h3>Net Worth:</h3> <p>$<%= @assets - @liabilities %></p></li>
   <ul>
 </div>
+
 <div class="last-section">
   <h2>Tax Information</h2>
   <h3>Status:</h3>

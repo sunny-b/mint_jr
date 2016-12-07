@@ -5,6 +5,9 @@
   <link rel="stylesheet" href="stylesheets/style.css">
 </head>
 <header>
+  <% if session[:message] %>
+    <h4 class="message"><%= session.delete(:message) %></h4>
+  <% end %>
   <%= yield_content :header_links %>
   <h5 class="logo">Mint JR.</h5>
 </header>
