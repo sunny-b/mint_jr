@@ -6,11 +6,11 @@
       <th>Amount</th>
     </tr>
     <% @list.each do |item| %>
-      <tr>
+      <tr class="item">
         <td><%= item[:type] %></td>
-        <td><%= item[:amount] %></td>
+        <td>$<%= item[:amount] %></td>
         <td>
-          <form action="/<%= @page_name.downcase %>/<%= item[:id] %>/delete" method="post">
+          <form class="delete" action="/<%= @page_name.downcase %>/<%= item[:id] %>/delete" method="post">
             <button type="submit">Delete</button>
           </form>
         </td>
@@ -30,6 +30,10 @@
       </form>
     </tr>
   </table>
+</div>
+
+<div class="total">
+  <h3>Total: $<%= @total %></h3>
 </div>
 
 <% content_for :header_links do %>

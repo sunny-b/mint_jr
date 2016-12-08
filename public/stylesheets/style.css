@@ -64,6 +64,13 @@ a.main {
 .last-section {
   display: block;
   width: 100%;
+  clear: both;
+  padding-top: 15px;
+}
+
+div.total {
+  text-align: center;
+  margin-top: 20px;
 }
 
 ul {

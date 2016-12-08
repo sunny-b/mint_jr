@@ -4,6 +4,7 @@
     <li><a href="/incomes">Incomes:</a> <p>$<%= add_commas(@incomes) %></p></li>
     <li><a href="/expenses">Expenses:</a> <p>$<%= add_commas(@expenses) %></p></li>
     <li><h3>Cashflow:</h3> <p>$<%= add_commas(@incomes - @expenses) %></p></li>
+    <li><h3>Annual Gross Income:</h3> <p>$<%= add_commas(12 * (@incomes - @expenses)) %></p></li>
   <ul>
 </div>
 
@@ -19,7 +20,7 @@
 <div class="last-section">
   <h2>Tax Information</h2>
   <h3>Status:</h3>
-  <form action="/" method="get">
+  <form class="brackets" action="/" method="get">
     <select name="status">
       <option value="pick">Pick One</option>
       <option value="single" <%= session[:single] %>>Single</option>
@@ -28,7 +29,6 @@
       <option value="head" <%= session[:head] %>>Head of Household</option>
       <option value="widow" <%= session[:widow] %>>Widowed</option>
     </select>
-    <input type="submit">
   </form>
 
   <h3 class="block"> Federal Tax Bracket:</h3>

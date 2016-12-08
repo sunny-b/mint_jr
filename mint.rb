@@ -6,6 +6,7 @@ require 'rack'
 require 'yaml'
 require 'bcrypt'
 require 'puma'
+require 'pry'
 
 configure do
   enable :sessions
@@ -22,6 +23,13 @@ before do
 end
 
 helpers do
+  def verify_login
+    unless session[:username]
+      session[:message] = "You must login."
+      redirect "/users/signin"
+    end
+  end
+
   def next_id(elements)
     max = elements.map { |element| element[:id] }.max || 0
     max + 1
@@ -151,19 +159,19 @@ end
 
 # visit main page
 get '/' do
-  if session[:username]
-    user_data = load_user_credentials
-    @incomes = calculate(user_data[session[:username]][:incomes].compact)
-    @expenses = calculate(user_data[session[:username]][:expenses].compact)
-    @assets = calculate(user_data[session[:username]][:assets].compact)
-    @liabilities = calculate(user_data[session[:username]][:liabilities].compact)
-    @tax_bracket = determine_tax_bracket(params[:status], @incomes, @expenses)
-    session[params[:status].to_sym] = 'selected' if params[:status]
+  verify_login
 
-    erb :index
+  user_data = load_user_credentials
+  @incomes = calculate(user_data[session[:username]][:incomes])
+  @expenses = calculate(user_data[session[:username]][:expenses])
+  @assets = calculate(user_data[session[:username]][:assets])
+  @liabilities = calculate(user_data[session[:username]][:liabilities])
+  @tax_bracket = determine_tax_bracket(params[:status], @incomes, @expenses)
+  session[params[:status].to_sym] = 'selected' if params[:status]
+  if env['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest'
+    "/?status=#{params[:status]}"
   else
-    session[:message] = 'Please login first.'
-    redirect '/users/signin'
+    erb :index
   end
 end
 
@@ -174,6 +182,9 @@ end
 
 # visit incomes page
 get '/:page_name' do
+  verify_login
+  user_data = load_user_credentials
+  @total = calculate(user_data[session[:username]][params[:page_name].to_sym])
   @list, @page_name, @item_description = load_list_info(params[:page_name])
   erb :list_page
 end
@@ -204,11 +215,15 @@ end
 post '/:page_name/:id/delete' do
   user_data = load_user_credentials
   user_info = user_data[session[:username]][params[:page_name].to_sym]
-  user_info.reject! do |item|
-    item[:id] == params[:id].to_i
-  end
+  user_info.reject! { |item| item[:id] == params[:id].to_i }
   update_user_info(user_data)
-  redirect "/#{params[:page_name]}"
+  total = calculate(user_data[session[:username]][params[:page_name].to_sym])
+  if env['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest'
+    status 204
+    total
+  else
+    redirect "/#{params[:page_name]}"
+  end
 end
 
 def correct_login?(user, password)
