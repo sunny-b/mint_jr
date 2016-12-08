@@ -9,10 +9,6 @@ gem 'rack'
 gem 'minitest'
 gem 'bcrypt'
 
-group :development do
-  gem 'pry'
-end
-
 group :production do
   gem "puma"
 end
