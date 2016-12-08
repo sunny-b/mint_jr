@@ -6,7 +6,6 @@ require 'rack'
 require 'yaml'
 require 'bcrypt'
 require 'puma'
-require 'pry'
 
 configure do
   enable :sessions
