@@ -12,3 +12,7 @@ gem 'bcrypt'
 group :production do
   gem "puma"
 end
+
+group :development do
+  gem 'pry'
+end
