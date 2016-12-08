@@ -1,2 +1,2 @@
-require "/mint_jr"
+require "./mint"
 run Sinatra::Application
