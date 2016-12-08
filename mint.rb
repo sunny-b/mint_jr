@@ -150,10 +150,10 @@ helpers do
     when (413_351...441_001) then '33-35%'
     end
   end
-end
 
-def calculate(category)
-  category.empty? ? 0 : category.map { |item| item[:amount].to_i }.reduce(:+)
+  def calculate(category)
+    category.empty? ? 0 : category.map { |item| item[:amount].to_i }.reduce(:+)
+  end
 end
 
 # visit main page
@@ -182,6 +182,7 @@ end
 # visit incomes page
 get '/:page_name' do
   verify_login
+
   user_data = load_user_credentials
   @total = calculate(user_data[session[:username]][params[:page_name].to_sym])
   @list, @page_name, @item_description = load_list_info(params[:page_name])
