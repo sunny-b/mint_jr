@@ -62,8 +62,8 @@ helpers do
   end
 
   def load_list_info(list)
-    data = load_user_credentials
-    list_type = data[session[:username]][list.to_sym]
+    user_data = load_user_credentials
+    list_type = user_data[session[:username]][list.to_sym]
     list_name = list.capitalize
     description = case list
                   when 'incomes'     then 'Salary, Freelance, etc.'
@@ -93,10 +93,10 @@ helpers do
   end
 
   def calculate_single(net)
-    return '0%' if net < 0
+    return '0%' if net <= 0
     return '35% - 39.6%' if net >= 415_051
     case net
-    when (0...9_276)         then '0% - 10%'
+    when (1...9_276)         then '0% - 10%'
     when (9_276...37_651)    then '10% - 15%'
     when (37_651...91_151)   then '15% - 25%'
     when (91_151...190_151)  then '25% - 28%'
@@ -106,10 +106,10 @@ helpers do
   end
 
   def calculate_joint_widow(net)
-    return '0%' if net < 0
+    return '0%' if net <= 0
     return '35% - 39.6%' if net >= 466_951
     case net
-    when (0...18_551)        then '0% - 10%'
+    when (1...18_551)        then '0% - 10%'
     when (18_851...75_301)   then '10% - 15%'
     when (75_301...151_901)  then '15% - 25%'
     when (151_901...231_451) then '25% - 28%'
@@ -119,10 +119,10 @@ helpers do
   end
 
   def calculate_separate(net)
-    return '0%' if net < 0
+    return '0%' if net <= 0
     return '35% - 39.6%' if net >= 233_476
     case net
-    when (0...9_276)         then '0% - 10%'
+    when (1...9_276)         then '0% - 10%'
     when (9_276...37_651)    then '10% - 15%'
     when (37_651...75_951)   then '15% - 25%'
     when (75_951...115_726)  then '25% - 28%'
@@ -132,10 +132,10 @@ helpers do
   end
 
   def calculate_head(net)
-    return '0%' if net < 0
+    return '0%' if net <= 0
     return '35% - 39.6%' if net >= 441_001
     case net
-    when (0...13_251)        then '0% - 10%'
+    when (1...13_251)        then '0% - 10%'
     when (13_251...50_401)   then '10% - 15%'
     when (50_401...130_151)  then '15% - 25%'
     when (130_151...210_801) then '25% - 28%'
@@ -152,11 +152,11 @@ end
 # visit main page
 get '/' do
   if session[:username]
-    data = load_user_credentials
-    @incomes = calculate(data[session[:username]][:incomes].compact)
-    @expenses = calculate(data[session[:username]][:expenses].compact)
-    @assets = calculate(data[session[:username]][:assets].compact)
-    @liabilities = calculate(data[session[:username]][:liabilities].compact)
+    user_data = load_user_credentials
+    @incomes = calculate(user_data[session[:username]][:incomes].compact)
+    @expenses = calculate(user_data[session[:username]][:expenses].compact)
+    @assets = calculate(user_data[session[:username]][:assets].compact)
+    @liabilities = calculate(user_data[session[:username]][:liabilities].compact)
     @tax_bracket = determine_tax_bracket(params[:status], @incomes, @expenses)
     session[params[:status].to_sym] = 'selected' if params[:status]
 
@@ -180,7 +180,7 @@ end
 
 # add income item
 post '/:page_name/add' do
-  data = load_user_credentials
+  user_data = load_user_credentials
   @list, @page_name, @item_description = load_list_info(params[:page_name])
   if params[:type].strip.empty?
     session[:message] = 'Please enter a type.'
@@ -191,11 +191,11 @@ post '/:page_name/add' do
     erb :list_page
   else
     finance_type = params[:page_name].to_sym
-    finances = data[session[:username]][finance_type]
+    finances = user_data[session[:username]][finance_type]
     finances << { type: params[:type],
                   amount: params[:amount].to_i,
-                  id: next_id(data[session[:username]][finance_type]) }
-    update_user_info(data)
+                  id: next_id(user_data[session[:username]][finance_type]) }
+    update_user_info(user_data)
     redirect "/#{params[:page_name]}"
   end
 end
@@ -203,7 +203,7 @@ end
 # Delete Income item
 post '/:page_name/:id/delete' do
   user_data = load_user_credentials
-  user_info = data[session[:username]][params[:page_name].to_sym]
+  user_info = user_data[session[:username]][params[:page_name].to_sym]
   user_info.reject! do |item|
     item[:id] == params[:id].to_i
   end
@@ -252,26 +252,26 @@ def valid_password?(password, confirm_password)
 end
 
 post '/users/signup' do
-  data = load_user_credentials
+  user_data = load_user_credentials
   username = params[:username]
   password = params[:password]
   confirm = params[:con_password]
 
-  if !valid_user?(username, data)
+  if !valid_user?(username, user_data)
     session[:message] = 'Username is either taken or empty.'
     erb :signup
   elsif !valid_password?(password, confirm)
     session[:message] = 'Passwords either don\'t match or are empty'
     erb :signup
-  elsif valid_user?(username, data) && valid_password?(password, confirm)
-    data[username] = {}
+  elsif valid_user?(username, user_data) && valid_password?(password, confirm)
+    user_data[username] = {}
     password = BCrypt::Password.create(password)
-    data[username][:password] = password
-    data[username][:incomes] = []
-    data[username][:expenses] = []
-    data[username][:assets] = []
-    data[username][:liabilities] = []
-    update_user_info(data)
+    user_data[username][:password] = password
+    user_data[username][:incomes] = []
+    user_data[username][:expenses] = []
+    user_data[username][:assets] = []
+    user_data[username][:liabilities] = []
+    update_user_info(user_data)
     session[:message] = "#{username} was created. Please login."
     redirect '/users/signin'
   end

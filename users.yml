@@ -2,7 +2,7 @@
 admin:
   :password: "$2a$10$3uQijvygU/v3TdN5eGQFguwmcsZj7R30OEY9l/rStUaADdVXV.zZq"
   :incomes:
-  - :type: Salary
+  - :type: salary
     :amount: 100
     :id: 1
   :expenses: []
