@@ -5,6 +5,7 @@ require 'tilt/erubis'
 require 'rack'
 require 'yaml'
 require 'bcrypt'
+require 'puma'
 
 configure do
   enable :sessions
