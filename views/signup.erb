@@ -1,0 +1,21 @@
+<div class='frontpage'>
+  <form action='/users/signup' method='post'>
+    <div class="text-field">
+      <label for="username">Choose a Username:</label>
+      <input name="username" type="text" value=<%= params[:username] %>>
+    </div>
+    <div class="text-field">
+      <label for="password">Create a Password:</label>
+      <input name="password" type="password">
+    </div>
+    <div class="text-field">
+      <label for="con_password">Confirm Password:</label>
+      <input name="con_password" type="password">
+    </div>
+    <input type="submit" value="Create User">
+  </form>
+</div>
+
+<% content_for :header_links do %>
+  <h1 class="logo">Mint JR.</h5>
+<% end %>

@@ -1,2 +1,18 @@
+---
 admin:
-  :password: $2a$10$3uQijvygU/v3TdN5eGQFguwmcsZj7R30OEY9l/rStUaADdVXV.zZq
+  :password: "$2a$10$3uQijvygU/v3TdN5eGQFguwmcsZj7R30OEY9l/rStUaADdVXV.zZq"
+  :incomes: []
+  :expenses: []
+  :assets: []
+  :liabilities: []
+bob:
+  :password: !ruby/string:BCrypt::Password
+    str: "$2a$10$ptXpBCwXXQc4NbKXKNii2OPsGPy97TiRJhll01uEwIUQYiGcWXI/m"
+    version: 2a
+    cost: 10
+    salt: "$2a$10$ptXpBCwXXQc4NbKXKNii2O"
+    checksum: PsGPy97TiRJhll01uEwIUQYiGcWXI/m
+  :incomes: []
+  :expenses: []
+  :assets: []
+  :liabilities: []

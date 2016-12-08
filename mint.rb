@@ -14,10 +14,6 @@ end
 
 before do
   session[:username] ||= nil
-  session[:incomes] ||= []
-  session[:expenses] ||= []
-  session[:assets] ||= []
-  session[:liabilities] ||= []
   session[:single] = nil
   session[:joint] = nil
   session[:separate] = nil
@@ -34,10 +30,12 @@ helpers do
   def add_commas(amount)
     result = []
     reversed_amount = amount.to_s.chars.reverse
+    sign = reversed_amount.pop if amount.to_i < 0
     until reversed_amount.empty?
       result << reversed_amount.shift(3)
       result << [','] unless reversed_amount.empty?
     end
+    result << [sign] if sign
     result.flatten.reverse.join
   end
 
@@ -50,8 +48,18 @@ helpers do
     YAML.load_file(credentials)
   end
 
+  def update_user_info(data)
+    credentials = if ENV["RACK_ENV"] == 'test'
+      File.expand_path("../test/users.yml", __FILE__)
+    else
+      File.expand_path("../users.yml", __FILE__)
+    end
+    File.open(credentials, 'wb') { |file| YAML.dump(data, file) }
+  end
+
   def load_list_info(list)
-    list_type = session[list.to_sym]
+    data = load_user_credentials
+    list_type = data[session[:username]][list.to_sym]
     list_name = list.capitalize
     description = case list
     when 'incomes'     then 'Salary, Freelance, etc.'
@@ -64,7 +72,7 @@ helpers do
   end
 
   def determine_tax_bracket(status, incomes, expenses)
-    net_income = incomes - expenses
+    net_income = (incomes - expenses) * 12
 
     case status
     when '' || 'pick' then nil
@@ -136,14 +144,14 @@ end
 # visit main page
 get '/' do
   if session[:username]
-    @incomes = calculate(session[:incomes])
-    @expenses = calculate(session[:expenses])
-    @assets = calculate(session[:assets])
-    @liabilities = calculate(session[:liabilities])
+    data = load_user_credentials
+    @incomes = calculate(data[session[:username]][:incomes].compact)
+    @expenses = calculate(data[session[:username]][:expenses].compact)
+    @assets = calculate(data[session[:username]][:assets].compact)
+    @liabilities = calculate(data[session[:username]][:liabilities].compact)
     @tax_bracket = determine_tax_bracket(params[:status], @incomes, @expenses)
-    if params[:status]
-      session[params[:status].to_sym] = 'selected'
-    end
+    session[params[:status].to_sym] = 'selected' if params[:status]
+
     erb :index
   else
     session[:message] = "Please login first."
@@ -164,6 +172,7 @@ end
 
 # add income item
 post '/:page_name/add' do
+  data = load_user_credentials
   @list, @page_name, @item_description = load_list_info(params[:page_name])
   if params[:type].strip.empty?
     session[:message] = "Please enter a type."
@@ -172,14 +181,18 @@ post '/:page_name/add' do
     session[:message] = "Please enter a valid number amount."
     redirect "/#{params[:page_name]}"
   else
-    session[params[:page_name].to_sym] << { type: params[:type], amount: params[:amount].to_i, id: next_id(session[:incomes])}
+    finance_type = params[:page_name].to_sym
+    data[session[:username]][finance_type] << { type: params[:type], amount: params[:amount].to_i, id: next_id(data[session[:username]][finance_type])}
+    update_user_info(data)
     redirect "/#{params[:page_name]}"
   end
 end
 
 # Delete Income item
 post '/:page_name/:id/delete' do
-  session[params[:page_name].to_sym].reject! { |item| item[:id] == params[:id].to_i }
+  data = load_user_credentials
+  data[session[:username]][params[:page_name].to_sym].reject! { |item| item[:id] == params[:id].to_i }
+  update_user_info(data)
   redirect "/#{params[:page_name]}"
 end
 
@@ -209,4 +222,42 @@ post "/users/signout" do
   session[:username] = nil
   session[:message] = "You have been logged out."
   redirect "/users/signin"
+end
+
+get '/users/signup' do
+  erb :signup
+end
+
+def valid_user?(user, data)
+  !data.key?(user) && !user.empty?
+end
+
+def valid_password?(password, confirm_password)
+  (password == confirm_password) && !password.empty?
+end
+
+post "/users/signup" do
+  data = load_user_credentials
+  username = params[:username]
+  password = params[:password]
+  confirm = params[:con_password]
+
+  if !valid_user?(username, data)
+    session[:message] = "Username is either taken or empty."
+    erb :signup
+  elsif !valid_password?(password, confirm)
+    session[:message] = "Passwords either don't match or are empty"
+    erb :signup
+  elsif valid_user?(username, data) && valid_password?(password, confirm)
+    data[username] = {}
+    password = BCrypt::Password.create(password)
+    data[username][:password] = password
+    data[username][:incomes] = []
+    data[username][:expenses] = []
+    data[username][:assets] = []
+    data[username][:liabilities] = []
+    update_user_info(data)
+    session[:message] = "#{username} was created. Please login."
+    redirect '/users/signin'
+  end
 end

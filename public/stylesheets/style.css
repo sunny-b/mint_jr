@@ -124,14 +124,14 @@ h1.logo::before {
   right: 0;
 }
 
-div.signin {
+div.frontpage {
   margin: 182px auto 0;
   display: block;
   width: auto;
   text-align: center;
 }
 
-div.signin form {
+div.frontpage form {
   display: block;
 }
 
