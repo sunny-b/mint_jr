@@ -12,6 +12,7 @@ GEM
       coderay (~> 1.1.0)
       method_source (~> 0.8.1)
       slop (~> 3.4)
+    puma (3.6.2)
     rack (1.6.5)
     rack-protection (1.5.3)
       rack
@@ -39,9 +40,13 @@ DEPENDENCIES
   erubis
   minitest
   pry
+  puma
   rack
   sinatra
   sinatra-contrib
+
+RUBY VERSION
+   ruby 2.3.1p112
 
 BUNDLED WITH
    1.13.6
