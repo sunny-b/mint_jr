@@ -19,7 +19,7 @@
     <tr>
       <form action="/<%= @page_name.downcase %>/add" method="post">
         <td>
-          <input name="type" placeholder="<%= @item_description %>" type="text">
+          <input name="type" placeholder="<%= @item_description %>" type="text" value="<%= params[:type] %>">
         </td>
         <td>
           <input name="amount" placeholder="100, 200, etc." type="text">

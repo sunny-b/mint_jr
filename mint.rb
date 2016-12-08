@@ -5,7 +5,6 @@ require 'tilt/erubis'
 require 'rack'
 require 'yaml'
 require 'bcrypt'
-require 'pry'
 
 configure do
   enable :sessions
@@ -176,10 +175,10 @@ post '/:page_name/add' do
   @list, @page_name, @item_description = load_list_info(params[:page_name])
   if params[:type].strip.empty?
     session[:message] = "Please enter a type."
-    redirect "/#{params[:page_name]}"
+    erb :list_page
   elsif params[:amount].to_i.to_s != params[:amount]
     session[:message] = "Please enter a valid number amount."
-    redirect "/#{params[:page_name]}"
+    erb :list_page
   else
     finance_type = params[:page_name].to_sym
     data[session[:username]][finance_type] << { type: params[:type], amount: params[:amount].to_i, id: next_id(data[session[:username]][finance_type])}
