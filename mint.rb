@@ -192,13 +192,16 @@ end
 # add income item
 post '/:page_name/add' do
   user_data = load_user_credentials
+  @total = calculate(user_data[session[:username]][params[:page_name].to_sym])
   @list, @page_name, @item_description = load_list_info(params[:page_name])
   if params[:type].strip.empty?
     session[:message] = 'Please enter a type.'
+    status 422
     erb :list_page
   elsif params[:amount].to_i.to_s != params[:amount]
     message = 'Please enter a valid number amount to the nearest dollar.'
     session[:message] = message
+    status 422
     erb :list_page
   else
     finance_type = params[:page_name].to_sym
@@ -274,9 +277,11 @@ post '/users/signup' do
 
   if !valid_user?(username, user_data)
     session[:message] = 'Username is either taken or empty.'
+    status 422
     erb :signup
   elsif !valid_password?(password, confirm)
     session[:message] = 'Passwords either don\'t match or are empty'
+    status 422
     erb :signup
   elsif valid_user?(username, user_data) && valid_password?(password, confirm)
     user_data[username] = {}

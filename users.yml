@@ -5,3 +5,14 @@ admin:
   :expenses: []
   :assets: []
   :liabilities: []
+bob:
+  :password: !ruby/string:BCrypt::Password
+    str: "$2a$10$dqQlKy4b23By2IPsZ7/qGuFvohdMlhoEEWIjICiA88rTwkCKtviLO"
+    version: 2a
+    cost: 10
+    salt: "$2a$10$dqQlKy4b23By2IPsZ7/qGu"
+    checksum: FvohdMlhoEEWIjICiA88rTwkCKtviLO
+  :incomes: []
+  :expenses: []
+  :assets: []
+  :liabilities: []
