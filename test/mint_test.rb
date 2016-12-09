@@ -164,4 +164,10 @@ class MintTest < Minitest::Test
     refute_includes last_response.body, "Salary"
     refute_includes last_response.body, "50"
   end
+
+  def test_tax_bracket
+    get '/?status=single', {}, admin_signin
+    assert_equal 200, last_response.status
+    assert_includes last_response.body, '0%'
+  end
 end
