@@ -8,6 +8,8 @@ gem 'erubis'
 gem 'rack'
 gem 'minitest'
 gem 'bcrypt'
+gem 'pg'
+gem 'sequel'
 
 group :production do
   gem "puma"

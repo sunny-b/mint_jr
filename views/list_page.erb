@@ -7,10 +7,10 @@
     </tr>
     <% @list.each do |item| %>
       <tr class="item">
-        <td><%= item[:type] %></td>
-        <td>$<%= item[:amount] %></td>
+        <td><%= item["type"] %></td>
+        <td>$<%= item["amount"] %></td>
         <td>
-          <form class="delete" action="/<%= @page_name.downcase %>/<%= item[:id] %>/delete" method="post">
+          <form class="delete" action="/<%= @page_name.downcase %>/<%= item["id"] %>/delete" method="post">
             <button type="submit">Delete</button>
           </form>
         </td>
