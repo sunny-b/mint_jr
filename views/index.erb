@@ -41,7 +41,7 @@
 
 <% content_for :footer_signout do %>
   <form class="signout" action="users/signout" method="post">
-    <label for="signout">Signed in as <%= session[:username] %>.</label>
+    <label for="signout">Signed in as <%= @session.current_username %>.</label>
     <input type="submit" value="Sign Out">
   </form>
 <% end %>

@@ -7,6 +7,10 @@ class DatabasePersistence
     @logger = logger
   end
 
+  def current_username
+    @user
+  end
+
   def query(sql, *params)
     @logger.info "#{sql}: #{params}"
     @db.exec_params(sql, params)
@@ -32,7 +36,7 @@ class DatabasePersistence
   end
 
   def delete_item(finance_type, id)
-    sql = "DELETE FROM finances WHERE type = $1 AND user_id = $2"
+    sql = "DELETE FROM finances WHERE type = $1 AND id = $2"
     query(sql, finance_type, id)
   end
 
@@ -56,7 +60,7 @@ class DatabasePersistence
   def add_to(finance_type, name, amount)
     sql = "INSERT INTO finances (user_id, type, amount, name) VALUES ($1, $2, $3, $4)"
     user_id = retrieve_user_id
-    query(sql, user_id, finance_type, name, amount)
+    query(sql, user_id, finance_type, amount, name)
   end
 
   def load_list_data(list)
@@ -109,9 +113,5 @@ class DatabasePersistence
   def retrieve_user_id
     sql = 'SELECT id FROM users WHERE name = $1'
     query(sql, @user).first["id"].to_i
-  end
-
-  def current_username
-    @user
   end
 end

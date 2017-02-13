@@ -11,7 +11,6 @@ require_relative 'database_persistence'
 configure do
   enable :sessions
   set :session_secret, 'super secret'
-  session[:user] = nil
 end
 
 configure(:development) do
@@ -21,7 +20,7 @@ configure(:development) do
 end
 
 before do
-  @session = DatabasePersistence.new(logger)
+  @session = DatabasePersistence.new(logger, 'admin')
   session[:single] = nil
   session[:joint] = nil
   session[:separate] = nil
@@ -152,7 +151,7 @@ get '/:page_name' do
   verify_login
 
   finance_type = params[:page_name].to_sym
-  @total = calculate(@session.method(finance_type).call)
+  @total = @session.calculate_total(finance_type)
   @list, @page_name, @item_description = @session.load_list_data(params[:page_name])
   erb :list_page
 end
@@ -160,8 +159,9 @@ end
 # add income item
 post '/:page_name/add' do
   finance_type = params[:page_name].to_sym
-  @total = calculate(@session.method(finance_type).call)
+  @total = @session.calculate_total(finance_type)
   @list, @page_name, @item_description = @session.load_list_data(params[:page_name])
+
   if params[:type].strip.empty?
     session[:message] = 'Please enter a type.'
     status 422
@@ -174,7 +174,7 @@ post '/:page_name/add' do
   else
     finance_type = params[:page_name].to_sym
 
-    @session.add_to(finance_type, params[:type], params[:amount].to_i)
+    @session.add_to(finance_type.to_s, params[:type], params[:amount].to_i)
     redirect "/#{params[:page_name]}"
   end
 end
@@ -183,9 +183,9 @@ end
 post '/:page_name/:id/delete' do
   finance_type = params[:page_name].to_sym
   id = params[:id].to_i
-  @session.delete_item(finance_type, id)
+  @session.delete_item(finance_type.to_s, id)
 
-  total = calculate(@session.method(finance_type).call)
+  total = @session.calculate_total(finance_type)
   redirect "/#{params[:page_name]}"
 end
 
