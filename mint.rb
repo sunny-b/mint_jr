@@ -6,7 +6,7 @@ require 'yaml'
 require 'bcrypt'
 require 'puma'
 
-require_relative 'database_persistence'
+require_relative 'lib/sequel_persistence'
 
 configure do
   enable :sessions
@@ -16,7 +16,7 @@ end
 configure(:development) do
   require 'sinatra/reloader'
   require 'pry'
-  also_reload 'sequel_persistence.rb' if development?
+  also_reload 'lib/sequel_persistence.rb' if development?
 end
 
 before do
