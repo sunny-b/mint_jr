@@ -16,21 +16,17 @@ end
 configure(:development) do
   require 'sinatra/reloader'
   require 'pry'
-  also_reload 'database_persistence.rb' if development?
+  also_reload 'sequel_persistence.rb' if development?
 end
 
 before do
-  @session = DatabasePersistence.new(logger, 'admin')
-  session[:single] = nil
-  session[:joint] = nil
-  session[:separate] = nil
-  session[:head] = nil
-  session[:widow] = nil
+  @db = SequelPersistence.new(logger, session[:username])
+  session[:username] ||= @db.current_username
 end
 
 helpers do
   def verify_login
-    unless @session.logged_in?
+    unless @db.logged_in?
       session[:message] = "You must login."
       redirect "/users/signin"
     end
@@ -127,10 +123,10 @@ end
 get '/' do
   verify_login
 
-  @incomes = @session.calculate_total('incomes')
-  @expenses = @session.calculate_total('expenses')
-  @assets = @session.calculate_total('assets')
-  @liabilities = @session.calculate_total('liabilities')
+  @incomes = @db.calculate_total('incomes')
+  @expenses = @db.calculate_total('expenses')
+  @assets = @db.calculate_total('assets')
+  @liabilities = @db.calculate_total('liabilities')
   @tax_bracket = determine_tax_bracket(params[:status], @incomes, @expenses)
 
   session[params[:status].to_sym] = 'selected' if params[:status]
@@ -151,16 +147,16 @@ get '/:page_name' do
   verify_login
 
   finance_type = params[:page_name].to_sym
-  @total = @session.calculate_total(finance_type)
-  @list, @page_name, @item_description = @session.load_list_data(params[:page_name])
+  @total = @db.calculate_total(finance_type.to_s)
+  @list, @page_name, @item_description = @db.load_list_data(params[:page_name])
   erb :list_page
 end
 
 # add income item
 post '/:page_name/add' do
-  finance_type = params[:page_name].to_sym
-  @total = @session.calculate_total(finance_type)
-  @list, @page_name, @item_description = @session.load_list_data(params[:page_name])
+  finance_type = params[:page_name]
+  @total = @db.calculate_total(finance_type)
+  @list, @page_name, @item_description = @db.load_list_data(params[:page_name])
 
   if params[:type].strip.empty?
     session[:message] = 'Please enter a type.'
@@ -172,28 +168,27 @@ post '/:page_name/add' do
     status 422
     erb :list_page
   else
-    finance_type = params[:page_name].to_sym
-
-    @session.add_to(finance_type.to_s, params[:type], params[:amount].to_i)
+    @db.add_to(finance_type, params[:type], params[:amount].to_i)
     redirect "/#{params[:page_name]}"
   end
 end
 
 # Delete Income item
 post '/:page_name/:id/delete' do
-  finance_type = params[:page_name].to_sym
+  finance_type = params[:page_name]
   id = params[:id].to_i
-  @session.delete_item(finance_type.to_s, id)
+  @db.delete_item(finance_type, id)
 
-  total = @session.calculate_total(finance_type)
+  total = @db.calculate_total(finance_type)
   redirect "/#{params[:page_name]}"
 end
 
 post '/users/signin' do
   username = params[:username]
   password = params[:password]
-  if @session.correct_login?(username, password)
-    @session.login(username)
+  if @db.correct_login?(username, password)
+    @db.login(username)
+    session[:username] = username
     session[:message] = 'Welcome!'
     redirect '/'
   else
@@ -203,7 +198,7 @@ post '/users/signin' do
 end
 
 post '/users/signout' do
-  @session.logout
+  @db.logout
   session[:message] = 'You have been logged out.'
   redirect '/users/signin'
 end
@@ -217,7 +212,7 @@ def valid_password?(password, confirm_password)
 end
 
 def valid_user?(username)
-  !@session.user_exist?(username) && !username.empty?
+  !@db.user_exist?(username) && !username.empty?
 end
 
 post '/users/signup' do
@@ -234,7 +229,7 @@ post '/users/signup' do
     status 422
     erb :signup
   elsif valid_user?(username) && valid_password?(password, confirm)
-    @session.create_new_user(username, password)
+    @db.create_new_user(username, password)
     session[:message] = "#{username} was created. Please login."
     redirect '/users/signin'
   end
